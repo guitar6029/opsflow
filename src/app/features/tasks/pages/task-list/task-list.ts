@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { TaskService } from '../../services/task';
 import { AsyncPipe } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
+import { Validators } from '@angular/forms';
 @Component({
   selector: 'app-task-list',
   imports: [AsyncPipe, ReactiveFormsModule],
@@ -17,12 +18,18 @@ export class TaskList {
   }
 
   form = new FormGroup({
-    title: new FormControl(''),
-    status: new FormControl('open'),
+    title: new FormControl('', Validators.required),
+    status: new FormControl('open', Validators.required),
   });
 
   showTaskForm = false;
   availableStatuses = ['open', 'in_progress', 'closed'];
+
+  ngOnInit() {
+    this.form.valueChanges.subscribe((value) => {
+      console.log('form changed : ', value);
+    });
+  }
 
   toggleFormView() {
     this.showTaskForm = !this.showTaskForm;
@@ -30,6 +37,11 @@ export class TaskList {
 
   //controlled
   addTask() {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
     const value = this.form.value;
 
     if (!value.title || !value.status) return;
