@@ -38,8 +38,17 @@
       </form>
     </div> -->
   }
+  <div>
+    <label>Select Filter By</label>
+    <select [formControl]="filterControl">
+      <option value="all">All</option>
+      @for (option of availableStatuses; track option) {
+        <option [value]="option">{{ option }}</option>
+      }
+    </select>
+  </div>
 
-  @if (tasks$ | async; as tasks) {
+  @if (filteredTasks$ | async; as tasks) {
     <ul>
       @for (task of tasks; track task.id) {
         <li>{{ task.title }}</li>

@@ -1,8 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { TaskService } from '../../services/task';
 import { AsyncPipe } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
 import { Validators } from '@angular/forms';
+import { combineLatest, map, startWith } from 'rxjs';
+
 @Component({
   selector: 'app-task-list',
   imports: [AsyncPipe, ReactiveFormsModule],
@@ -11,11 +13,20 @@ import { Validators } from '@angular/forms';
   styleUrl: './task-list.css',
 })
 export class TaskList {
-  tasks$;
+  private taskService = inject(TaskService);
+  tasks$ = this.taskService.tasks$;
+  filterControl = new FormControl('all', { nonNullable: true });
 
-  constructor(private taskService: TaskService) {
-    this.tasks$ = this.taskService.tasks$;
-  }
+  filteredTasks$ = combineLatest([
+    this.tasks$,
+    this.filterControl.valueChanges.pipe(startWith(this.filterControl.value)),
+  ]).pipe(
+    map(([tasks, filter]) => {
+      if (!filter || filter === 'all') return tasks;
+
+      return tasks.filter((task) => task.status === filter);
+    }),
+  );
 
   form = new FormGroup({
     title: new FormControl('', Validators.required),
