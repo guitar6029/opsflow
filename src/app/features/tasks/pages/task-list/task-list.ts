@@ -3,7 +3,7 @@ import { TaskService } from '../../services/task';
 import { AsyncPipe } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
 import { Validators } from '@angular/forms';
-import { combineLatest, map, startWith } from 'rxjs';
+import { combineLatest, map, startWith, debounceTime, distinctUntilChanged } from 'rxjs';
 
 @Component({
   selector: 'app-task-list',
@@ -16,15 +16,32 @@ export class TaskList {
   private taskService = inject(TaskService);
   tasks$ = this.taskService.tasks$;
   filterControl = new FormControl('all', { nonNullable: true });
+  searchControl = new FormControl('', { nonNullable: true });
+  search$ = this.searchControl.valueChanges.pipe(
+    debounceTime(300),
+    distinctUntilChanged(),
+    startWith(''),
+  );
 
   filteredTasks$ = combineLatest([
     this.tasks$,
     this.filterControl.valueChanges.pipe(startWith(this.filterControl.value)),
+    this.search$,
   ]).pipe(
-    map(([tasks, filter]) => {
-      if (!filter || filter === 'all') return tasks;
+    map(([tasks, filter, search]) => {
+      let result = tasks;
 
-      return tasks.filter((task) => task.status === filter);
+      if (filter && filter !== 'all') {
+        result = result.filter((task) => task.status === filter);
+      }
+
+      if (search) {
+        result = result.filter((task) =>
+          task.title.toLocaleLowerCase().includes(search.toLocaleLowerCase()),
+        );
+      }
+
+      return result;
     }),
   );
 
@@ -76,5 +93,9 @@ export class TaskList {
 
     //clea form
     form.reset();
+  }
+
+  handleClearSearch() {
+    this.searchControl.setValue('');
   }
 }
