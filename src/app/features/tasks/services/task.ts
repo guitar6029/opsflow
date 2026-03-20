@@ -9,5 +9,15 @@ export class TaskService {
     { id: 2, title: 'Deploy update', status: 'in-progress' },
   ]);
 
+  private id = 3;
+
   tasks$ = this.taskSubject.asObservable();
+
+  addTask(task: { title: string; status: string }) {
+    //should generate id automatically
+    const currentTasks = this.taskSubject.getValue();
+
+    this.taskSubject.next([...currentTasks, { ...task, id: this.id }]);
+    this.id++;
+  }
 }
