@@ -3,7 +3,15 @@ import { TaskService } from '../../services/task';
 import { AsyncPipe } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
 import { Validators } from '@angular/forms';
-import { combineLatest, map, startWith, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
+import {
+  combineLatest,
+  map,
+  startWith,
+  debounceTime,
+  distinctUntilChanged,
+  switchMap,
+  finalize,
+} from 'rxjs';
 
 @Component({
   selector: 'app-task-list',
@@ -14,6 +22,7 @@ import { combineLatest, map, startWith, debounceTime, distinctUntilChanged, swit
 })
 export class TaskList {
   private taskService = inject(TaskService);
+  loading = false;
   tasks$ = this.taskService.tasks$;
   filterControl = new FormControl('all', { nonNullable: true });
   searchControl = new FormControl('', { nonNullable: true });
@@ -21,7 +30,10 @@ export class TaskList {
     startWith(''),
     debounceTime(300),
     distinctUntilChanged(),
-    switchMap((query) => this.taskService.searchTasks(query)),
+    switchMap((query) => {
+      this.loading = true;
+      return this.taskService.searchTasks(query).pipe(finalize(() => (this.loading = false)));
+    }),
   );
 
   filteredTasks$ = combineLatest([

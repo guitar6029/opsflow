@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, map } from 'rxjs';
+import { BehaviorSubject, map, delay, of, take } from 'rxjs';
 @Injectable({
   providedIn: 'root',
 })
@@ -23,6 +23,8 @@ export class TaskService {
 
   searchTasks(query: string) {
     return this.tasks$.pipe(
+      take(1),
+      delay(500),
       map((tasks) =>
         tasks.filter((task) => task.title.toLocaleLowerCase().includes(query.toLowerCase())),
       ),
