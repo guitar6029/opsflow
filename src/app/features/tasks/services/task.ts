@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, map } from 'rxjs';
 @Injectable({
   providedIn: 'root',
 })
@@ -19,5 +19,13 @@ export class TaskService {
 
     this.taskSubject.next([...currentTasks, { ...task, id: this.id }]);
     this.id++;
+  }
+
+  searchTasks(query: string) {
+    return this.tasks$.pipe(
+      map((tasks) =>
+        tasks.filter((task) => task.title.toLocaleLowerCase().includes(query.toLowerCase())),
+      ),
+    );
   }
 }

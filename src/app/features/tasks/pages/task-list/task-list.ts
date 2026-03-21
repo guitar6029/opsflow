@@ -3,7 +3,7 @@ import { TaskService } from '../../services/task';
 import { AsyncPipe } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
 import { Validators } from '@angular/forms';
-import { combineLatest, map, startWith, debounceTime, distinctUntilChanged } from 'rxjs';
+import { combineLatest, map, startWith, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-task-list',
@@ -18,30 +18,19 @@ export class TaskList {
   filterControl = new FormControl('all', { nonNullable: true });
   searchControl = new FormControl('', { nonNullable: true });
   search$ = this.searchControl.valueChanges.pipe(
+    startWith(''),
     debounceTime(300),
     distinctUntilChanged(),
-    startWith(''),
+    switchMap((query) => this.taskService.searchTasks(query)),
   );
 
   filteredTasks$ = combineLatest([
-    this.tasks$,
     this.filterControl.valueChanges.pipe(startWith(this.filterControl.value)),
     this.search$,
   ]).pipe(
-    map(([tasks, filter, search]) => {
-      let result = tasks;
-
-      if (filter && filter !== 'all') {
-        result = result.filter((task) => task.status === filter);
-      }
-
-      if (search) {
-        result = result.filter((task) =>
-          task.title.toLocaleLowerCase().includes(search.toLocaleLowerCase()),
-        );
-      }
-
-      return result;
+    map(([filter, tasks]) => {
+      if (filter === 'all') return tasks;
+      return tasks.filter((task) => task.status === filter);
     }),
   );
 

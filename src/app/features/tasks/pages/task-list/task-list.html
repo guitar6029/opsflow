@@ -39,12 +39,10 @@
     </div> -->
   }
 
-  @if (searchControl.value) {
-    <div class="flex flex-col gap-2">
-      <input [formControl]="searchControl" type="text" placeholder="Search tasks" />
-      <button (click)="handleClearSearch()">Clear</button>
-    </div>
-  }
+  <div class="flex flex-col gap-2">
+    <input [formControl]="searchControl" type="text" placeholder="Search tasks" />
+    <button (click)="handleClearSearch()">Clear</button>
+  </div>
 
   <div>
     <label>Select Filter By</label>
