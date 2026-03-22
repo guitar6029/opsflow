@@ -1,4 +1,4 @@
-<div class="flex flex-col gap-2">
+<div class="flex flex-col gap-2 p-4">
   <button (click)="toggleFormView()">Toggle Form {{ showTaskForm ? 'Showing' : 'Hiding' }}</button>
   @if (showTaskForm) {
     <form [formGroup]="form" (submit)="addTask()" class="text-2xl">
@@ -12,7 +12,7 @@
       <div>
         <label>Status</label>
         <select formControlName="status">
-          @for (option of availableStatuses; track option) {
+          @for (option of STATUSES; track option) {
             <option [value]="option">{{ option }}</option>
           }
         </select>
@@ -48,7 +48,7 @@
     <label>Select Filter By</label>
     <select [formControl]="filterControl">
       <option value="all">All</option>
-      @for (option of availableStatuses; track option) {
+      @for (option of STATUSES; track option) {
         <option [value]="option">{{ option }}</option>
       }
     </select>

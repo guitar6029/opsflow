@@ -1,19 +1,20 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, map, delay, throwError, take, timer, switchMap } from 'rxjs';
+import { Status, STATUSES, Task } from '../../../types/task/Task';
 @Injectable({
   providedIn: 'root',
 })
 export class TaskService {
-  private taskSubject = new BehaviorSubject([
+  private taskSubject = new BehaviorSubject<Task[]>([
     { id: 1, title: 'Fix server issue', status: 'open' },
-    { id: 2, title: 'Deploy update', status: 'in-progress' },
+    { id: 2, title: 'Deploy update', status: 'in_progress' },
   ]);
 
   private id = 3;
 
   tasks$ = this.taskSubject.asObservable();
 
-  addTask(task: { title: string; status: string }) {
+  addTask(task: { title: string; status: Status }) {
     //should generate id automatically
     const currentTasks = this.taskSubject.getValue();
 

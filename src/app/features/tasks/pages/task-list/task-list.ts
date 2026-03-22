@@ -13,6 +13,7 @@ import {
   switchMap,
   finalize,
 } from 'rxjs';
+import { Status, STATUSES } from '../../../../types/task/Task';
 
 @Component({
   selector: 'app-task-list',
@@ -24,6 +25,7 @@ import {
 export class TaskList {
   private taskService = inject(TaskService);
   loading = false;
+  readonly STATUSES = STATUSES;
   error: string | null = null;
   tasks$ = this.taskService.tasks$;
   filterControl = new FormControl('all', { nonNullable: true });
@@ -57,12 +59,11 @@ export class TaskList {
   );
 
   form = new FormGroup({
-    title: new FormControl('', Validators.required),
-    status: new FormControl('open', Validators.required),
+    title: new FormControl<string>('', Validators.required),
+    status: new FormControl<Status>('open', Validators.required),
   });
 
   showTaskForm = false;
-  availableStatuses = ['open', 'in_progress', 'closed'];
 
   ngOnInit() {
     this.form.valueChanges.subscribe((value) => {
@@ -99,7 +100,7 @@ export class TaskList {
     const formData = new FormData(form);
 
     const title = formData.get('title') as string;
-    const status = formData.get('status') as string;
+    const status = formData.get('status') as Status;
     this.taskService.addTask({ title, status });
 
     //clea form
