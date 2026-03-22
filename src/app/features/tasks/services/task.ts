@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, map, delay, of, take } from 'rxjs';
+import { BehaviorSubject, map, delay, throwError, take, timer, switchMap } from 'rxjs';
 @Injectable({
   providedIn: 'root',
 })
@@ -22,6 +22,10 @@ export class TaskService {
   }
 
   searchTasks(query: string) {
+    if (query === 'error') {
+      return timer(500).pipe(switchMap(() => throwError(() => new Error('Search failed'))));
+    }
+
     return this.tasks$.pipe(
       take(1),
       delay(500),

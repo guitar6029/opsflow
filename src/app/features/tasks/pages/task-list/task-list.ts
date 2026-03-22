@@ -3,6 +3,7 @@ import { TaskService } from '../../services/task';
 import { AsyncPipe } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
 import { Validators } from '@angular/forms';
+import { catchError, of } from 'rxjs';
 import {
   combineLatest,
   map,
@@ -23,6 +24,7 @@ import {
 export class TaskList {
   private taskService = inject(TaskService);
   loading = false;
+  error: string | null = null;
   tasks$ = this.taskService.tasks$;
   filterControl = new FormControl('all', { nonNullable: true });
   searchControl = new FormControl('', { nonNullable: true });
@@ -32,7 +34,15 @@ export class TaskList {
     distinctUntilChanged(),
     switchMap((query) => {
       this.loading = true;
-      return this.taskService.searchTasks(query).pipe(finalize(() => (this.loading = false)));
+      this.error = null;
+
+      return this.taskService.searchTasks(query).pipe(
+        catchError((err) => {
+          this.error = err;
+          return of([]);
+        }),
+        finalize(() => (this.loading = false)),
+      );
     }),
   );
 

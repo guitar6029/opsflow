@@ -56,6 +56,9 @@
   @if (loading) {
     <span>Loading...</span>
   }
+  @if (error) {
+    <span class="text-red-500">Error : {{ error }}</span>
+  }
   @if (filteredTasks$ | async; as tasks) {
     <ul>
       @for (task of tasks; track task.id) {
